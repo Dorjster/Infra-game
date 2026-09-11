@@ -1,30 +1,43 @@
-# Infrastructure // Alive — First-person Cable Lab
+# Infrastructure // Alive — FPS Service Lab
 
-## Install on your GitHub site
-Extract this ZIP. In Dorjster/infra-modern choose Add file > Upload files, upload ALL extracted files to the root, replacing old files, then commit to main. Include lab.js, hardware.js and OrbitControls.js. Keep Pages configured as main / (root). Wait for the Pages workflow to succeed, then open https://dorjster.github.io/infra-modern/ and hard-refresh with Command + Shift + R on Mac.
+## Update GitHub Pages
+Extract this ZIP. Go to Dorjster/infra-modern > Add file > Upload files. Upload ALL extracted files into the repository root, replacing old files, and commit to main. Include service-kit.js, lab.js, hardware.js and OrbitControls.js. Wait for the Pages workflow to finish, then open https://dorjster.github.io/infra-modern/ and press Command + Shift + R on Mac.
 
-## Play
-Click First person, then click the scene to capture your mouse.
-W A S D: walk; mouse: look; Shift: faster; Q/Z: raise/lower inspection height.
-Esc: release mouse. Click Overview to return to orbit and zoom controls.
-If mouse capture is unavailable, drag to look and use WASD to move.
-Aim at a port or cable within reach and press E to unplug. Aim at either original free port and press E again to reconnect the held cable.
-E elsewhere opens the workbench. F opens a path test for the device under the crosshair.
-Use the device selector to travel directly to hardware. Racks block walking through them; walk around either end to reach rear ports.
+## Controls
+Click First person, then click the scene for mouse capture. If capture is unavailable, drag to look.
+WASD: walk with smooth acceleration. Shift: sprint. Hold C: crouch. Release C: stand.
+Q: toggle upper inspection height and return to standing. Z no longer lowers the view.
+0: hands (unplug/reconnect infrastructure cables).
+1: console cable. 2: LAN cable.
+E: interact with the aimed device/port, laptop, or server monitor.
+Tab or F: open the laptop. Escape: close laptop/release mouse. X: unplug laptop cable.
+Overview: return to orbit/zoom controls.
 
-## Cable workbench
-Select a cable to trace, unplug or reconnect it. Patch a new cable by choosing two free ports on different devices with matching medium and speed. Internal backplanes are excluded. Occupied ports cannot be overwritten. SAN switch-to-switch patches are blocked to preserve fabric isolation.
-Probe a device to check Internet reachability and separate SAN controller paths.
-The redundancy challenge guides removal of one SERVER-01 network cable while its alternate path stays reachable. Removing both causes an outage; reconnecting restores a path.
-Reset cabling restores the original wiring and removes custom cables from service. Existing equipment failure simulations have a separate Restore all control.
+Standing eye height is scaled to a human relative to the 42U cabinets. Walking speed is approximately doubled from the previous edition; sprinting is faster still. Rack, cart and KVM station collisions stop the camera walking through equipment. Mouse look, crouch height and field of view change smoothly. Reduced-motion preference disables head bob.
+
+## Laptop inspection
+A mini laptop on a service cart stands beside the primary racks. A carried laptop is visible when a cable slot is equipped in first-person mode.
+Equip 1 and aim at an orange CONSOLE port on a switch, SAN switch or firewall; press E. Equip 2 for a blue SERVICE LAN port. A visible tether connects the laptop to the device. Existing optical/data ports are not interchangeable with the laptop service lead.
+A connection opens the laptop with device status. Use commands or the System / Interfaces / SAN paths buttons:
+help
+show system
+show interfaces
+show links
+show storage
+ping CORE-A
+clear
+
+X or Unplug laptop disconnects the service lead. Walking beyond the service lead length disconnects it automatically. Offline devices stop responding. Opening the laptop pauses movement.
+
+## Server monitors and keyboards
+Compute racks have a shared physical KVM monitor and keyboard station. Aim at it and press E, then choose the server on the KVM selector. This opens the server's local simulated inspection session without a laptop network cable.
+
+## Cable experiments
+Select 0 Hands to keep the original E unplug/reconnect interactions. Cable workbench supports tracing existing cables, patching matching free data ports, path tests, and the redundancy challenge. Reset cabling restores the original data cabling; equipment failures use the separate Restore all control. Laptop service cables have their own disconnect action.
 
 ## Scope
-Changes are session-local and reset on reload. This is a topology/physical-link training simulation, not a network emulator: no VLAN, routing, firewall policy, FC zoning, actual ping, speed negotiation or protocol convergence is modeled. Background telemetry is illustrative. Hardware is simplified Dell/Fortinet-inspired geometry, not manufacturer CAD. Desktop keyboard and mouse recommended; the workbench remains available without pointer lock.
+All sessions and telemetry are simulated and reset on reload. Service ports and KVM stations are training aids, not a verified manufacturer port layout. Console, LAN and KVM sessions are read-only. This does not emulate vendor operating systems, real serial settings, IP addressing, VLANs, routing protocols, firewall policy, FC zoning or actual ping. Graph probes reflect the simulated topology. Hardware geometry is a simplified Dell/Fortinet-inspired recreation, not manufacturer CAD.
 
-Validated with simulated DOM and real Three.js geometry: startup, camera transitions, dual-link failover/outage/recovery, port occupancy, patch creation, reset and existing fault scenarios. Browser rendering has not been visually tested.
+Checks used real Three.js geometry with a simulated DOM: existing fault flows, cable patches, occupied-port protection, normal movement speed, crouch/stand, upper inspection toggle, console/LAN sessions, disconnect, offline response and KVM server switching. Browser appearance has not been visually tested.
 
-## Hardware references
-https://www.dell.com/en-us/shop/ipovw/poweredge-r770
-https://www.dell.com/en-us/shop/ipovw/poweredge-xe9680
-https://www.fortinet.com/content/dam/fortinet/assets/data-sheets/fortigate-4400f-series.pdf
-Three.js and OrbitControls: see THREE-LICENSE.txt.
+Three.js / OrbitControls license: THREE-LICENSE.txt.
