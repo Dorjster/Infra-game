@@ -35,7 +35,7 @@ If mouse capture is unavailable over LAN HTTP in your browser, drag the scene to
 
 ## Field terminal and reachable devices
 
-Equip LAN (2), aim at a blue SERVICE LAN port, and press E. The management switch MGMT-SW is physically cabled to all managed devices. The laptop defaults to 10.10.70.250/24; devices have unique management addresses on VLAN 70.
+At startup the engineer laptop is already cabled to MGMT-SW with 10.10.70.250/24 on VLAN 70. Press Tab in Gameplay and select a device immediately. The fixed cart cable stays connected as you walk around. Connect MGMT-SW restores this laptop connection after manual unplugging or using a console. This does not reset switch configuration: a shut service port or changed VLAN still needs repair. The management switch MGMT-SW is physically cabled to all managed devices. The laptop defaults to 10.10.70.250/24; devices have unique management addresses on VLAN 70.
 
 Choose Target device. Only currently reachable devices can be selected. Switches, firewalls and SAN switches open simulated SSH sessions; compute, storage and GPU devices open OS / Performance dashboards. You can also enter ssh CORE-A or ssh followed by a management IP. Refresh updates the device list.
 
