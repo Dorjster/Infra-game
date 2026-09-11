@@ -1,17 +1,27 @@
+# Inspect / Gameplay modes
+
+Use the Inspect / Gameplay switch, or press M (outside a text input).
+Inspect: rack overview, device details, camera controls, topology sections, telemetry and the cable workbench.
+Gameplay: first-person movement, inventory, crosshair, brief interaction feedback, and laptop / console / KVM screens. Overview sheets, footer, navigation tabs, telemetry and the workbench are hidden. E no longer opens the workbench in gameplay; use Hands for direct unplug/reconnect operations, or equipped console/LAN cables to inspect devices.
+Switching back restores your inspection camera. Returning to gameplay resumes your walking position. Cable and device states are shared between modes for this session.
+Escape releases mouse capture so you can click the mode switch. Tab opens the laptop only in Gameplay; it keeps normal keyboard navigation in Inspect.
+
+Mode transitions and existing movement, cabling and service-session logic checks passed. Browser appearance has not been visually tested.
+
 # Infrastructure // Alive — FPS Service Lab
 
 ## Update GitHub Pages
 Extract this ZIP. Go to Dorjster/infra-modern > Add file > Upload files. Upload ALL extracted files into the repository root, replacing old files, and commit to main. Include service-kit.js, lab.js, hardware.js and OrbitControls.js. Wait for the Pages workflow to finish, then open https://dorjster.github.io/infra-modern/ and press Command + Shift + R on Mac.
 
 ## Controls
-Click First person, then click the scene for mouse capture. If capture is unavailable, drag to look.
+Select Gameplay, then click the scene for mouse capture. If capture is unavailable, drag to look.
 WASD: walk with smooth acceleration. Shift: sprint. Hold C: crouch. Release C: stand.
 Q: toggle upper inspection height and return to standing. Z no longer lowers the view.
 0: hands (unplug/reconnect infrastructure cables).
 1: console cable. 2: LAN cable.
 E: interact with the aimed device/port, laptop, or server monitor.
 Tab or F: open the laptop. Escape: close laptop/release mouse. X: unplug laptop cable.
-Overview: return to orbit/zoom controls.
+Inspect: return to orbit/zoom controls. M switches modes.
 
 Standing eye height is scaled to a human relative to the 42U cabinets. Walking speed is approximately doubled from the previous edition; sprinting is faster still. Rack, cart and KVM station collisions stop the camera walking through equipment. Mouse look, crouch height and field of view change smoothly. Reduced-motion preference disables head bob.
 
