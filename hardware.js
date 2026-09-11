@@ -87,6 +87,14 @@ connect('INTERNET','CLOUD EDGE');for(const s of ['A','B']){connect('CLOUD EDGE',
 for(let i=1;i<=6;i++){connect('TOR-01','SERVER-0'+i,'application','',25);connect('TOR-02','SERVER-0'+i,'application','',25);connect('TOR-02','SERVER-0'+i,'management','',1);connect('SERVER-0'+i,'SAN-A','storage','path-a');connect('SERVER-0'+i,'SAN-B','storage','path-b');}
 for(const c of ['A','B'])for(const s of ['A','B'])connect('SAN-'+s,'CONTROLLER-'+c,'storage',s==='A'?'path-a':'path-b');
 connect('CONTROLLER-A','NVMe ENCLOSURE','storage');connect('CONTROLLER-B','NVMe ENCLOSURE','storage');connect('CORE-B','OBJECT STORAGE');connect('NVMe ENCLOSURE','BACKUP','backup');connect('OBJECT STORAGE','BACKUP','backup');connect('OBJECT STORAGE','GPU-01','replication');connect('OBJECT STORAGE','GPU-02','replication');connect('TOR-03','GPU-01');connect('TOR-04','GPU-02');connect('BACKUP','DR-STORAGE','replication','',25);connect('OBJECT STORAGE','DR-STORAGE','replication','',25);connect('DR-CORE','DR-COMPUTE');connect('DR-CORE','DR-GPU');connect('DR-COMPUTE','DR-STORAGE','storage');connect('CLOUD EDGE','DR-CORE','application','dr-ingress');
+// Dedicated, visible management fabric for the training environment.
+const management=device('MGMT-SW','switch',security,20,1,'Management Ethernet switch / training fabric',{depth:2.8});
+management.ports.forEach((p,i)=>{p.name='MGMT-'+(i+1);p.speed=1;});
+for(const n of nodes.filter(n=>n.type!=='cloud'&&n!==management)){
+ addPorts(n,'rear',[{name:'MGMT UPLINK',speed:1,x:1.08,y:0}]);
+ const pa=management.ports.find(p=>!p.link),pb=n.ports.at(-1);
+ connect(management.id,n.id,'management','mgmt-fabric',1,[pa,pb]);
+}
 const endpointMarkers=[0,1].map(()=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.105,12,8),new THREE.MeshBasicMaterial({color:0xeaffff,transparent:true,opacity:.95}));m.visible=false;scene.add(m);return m;});
 return {nodes,links,pickables,fans,byId,materials,box,label,racks,endpointMarkers,trafficColors:colors,connect};
 }

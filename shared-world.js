@@ -1,0 +1,15 @@
+export function cableID(l,byId){return `${l.a}:${byId[l.a].ports.indexOf(l.pa)}>${l.b}:${byId[l.b].ports.indexOf(l.pb)}`;}
+export function createSharedWorld({nodes,links,byId,connect,refreshFaults,state},network){
+ const initial=links.slice();
+ const configFor=p=>p.cfg??{admin:true,mode:'access',access:1,allowed:[1,70]};
+ function snapshot(){return {nets:network.snapshot(),cables:links.map(l=>({id:cableID(l,byId),a:l.a,b:l.b,pa:byId[l.a].ports.indexOf(l.pa),pb:byId[l.b].ports.indexOf(l.pb),kind:l.kind,tag:l.tag,speed:l.speed,custom:!!l.custom,unplugged:!!l.unplugged})),faults:{link:!!state.link,controller:!!state.controller,san:!!state.san,site:!!state.site,pending:false}};}
+ function restore(data){if(!data)return;network.restore(data.nets);for(const n of nodes)for(const p of n.ports)p.link=null;for(const l of links)l.unplugged=true;
+ for(const c of data.cables){const a=byId[c.a],b=byId[c.b];if(!a||!b||!a.ports[c.pa]||!b.ports[c.pb])continue;let l=links.find(l=>cableID(l,byId)===c.id);if(!l){l=connect(c.a,c.b,c.kind,c.tag,c.speed,[a.ports[c.pa],b.ports[c.pb]]);l.custom=true;}l.unplugged=c.unplugged;if(!l.unplugged){l.pa.link=l;l.pb.link=l;}else {if(l.pa.link===l)l.pa.link=null;if(l.pb.link===l)l.pb.link=null;}}
+ Object.assign(state,data.faults,{pending:false});refreshFaults();}
+ function apply(action){if(action.type==='config')return network.apply(action.action);
+ if(action.type==='reset-cables'){for(const n of nodes)for(const p of n.ports)p.link=null;for(const l of links)l.unplugged=true;for(const l of initial){l.unplugged=false;l.pa.link=l;l.pb.link=l;}refreshFaults();return 'Original cabling restored';}
+ if(action.type==='cable'){const l=links.find(l=>cableID(l,byId)===action.id);if(!l||l.pa.medium==='Internal'||l.pb.medium==='Internal')throw new Error('Cable unavailable');if(action.unplugged){l.unplugged=true;if(l.pa.link===l)l.pa.link=null;if(l.pb.link===l)l.pb.link=null;}else{if(l.pa.link&&l.pa.link!==l||l.pb.link&&l.pb.link!==l)throw new Error('Port occupied');l.unplugged=false;l.pa.link=l;l.pb.link=l;}refreshFaults();return l.unplugged?'Cable unplugged':'Cable reconnected';}
+ if(action.type==='connect'){const a=byId[action.a],b=byId[action.b],pa=a?.ports[action.pa],pb=b?.ports[action.pb];if(!pa||!pb||a===b||pa.link||pb.link||pa.service||pb.service||pa.medium==='Internal'||pa.medium==='Console'||pa.medium!==pb.medium||pa.speed!==pb.speed)throw new Error('Choose compatible free data ports');if(a.type==='san'&&b.type==='san')throw new Error('Keep SAN fabrics isolated');const existing=links.find(l=>l.a===a.id&&l.b===b.id&&l.pa===pa&&l.pb===pb);if(existing){existing.unplugged=false;pa.link=existing;pb.link=existing;}else{if(links.length>400)throw new Error('Cable limit reached; reuse an unplugged cable');const l=connect(a.id,b.id,pa.medium==='Fibre Channel'?'storage':'application','lab',Math.min(pa.speed,pb.speed),[pa,pb]);l.custom=true;}pa.cfg=configFor(pa);pb.cfg=configFor(pb);refreshFaults();return 'Ports connected';}
+ throw new Error('Unknown world action');}
+ return {snapshot,restore,apply};
+}

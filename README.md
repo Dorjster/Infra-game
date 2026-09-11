@@ -1,53 +1,96 @@
-# Inspect / Gameplay modes
+# Infrastructure co-op lab
 
-Use the Inspect / Gameplay switch, or press M (outside a text input).
-Inspect: rack overview, device details, camera controls, topology sections, telemetry and the cable workbench.
-Gameplay: first-person movement, inventory, crosshair, brief interaction feedback, and laptop / console / KVM screens. Overview sheets, footer, navigation tabs, telemetry and the workbench are hidden. E no longer opens the workbench in gameplay; use Hands for direct unplug/reconnect operations, or equipped console/LAN cables to inspect devices.
-Switching back restores your inspection camera. Returning to gameplay resumes your walking position. Cable and device states are shared between modes for this session.
-Escape releases mouse capture so you can click the mode switch. Tab opens the laptop only in Gameplay; it keeps normal keyboard navigation in Inspect.
+## Start a four-player LAN room
 
-Mode transitions and existing movement, cabling and service-session logic checks passed. Browser appearance has not been visually tested.
+1. Extract the entire ZIP into one folder.
+2. Install Node.js 22 or newer from https://nodejs.org/ if needed.
+3. Open Terminal in that folder and run:
 
-# Infrastructure // Alive — FPS Service Lab
+   node lan/server.mjs
 
-## Update GitHub Pages
-Extract this ZIP. Go to Dorjster/infra-modern > Add file > Upload files. Upload ALL extracted files into the repository root, replacing old files, and commit to main. Include service-kit.js, lab.js, hardware.js and OrbitControls.js. Wait for the Pages workflow to finish, then open https://dorjster.github.io/infra-modern/ and press Command + Shift + R on Mac.
+4. The host opens the localhost address printed in Terminal. Friends on the same LAN open the printed LAN address, for example http://192.168.1.20:8080/.
+5. Each player clicks LAN co-op, enters a name and the printed room code, and clicks Join room. Then choose Gameplay.
+6. Maximum four players, including the host. A fifth player is rejected. Click Leave room to free a slot. Inactive/lost clients expire after 30 seconds.
+7. Keep the host Terminal running. Ctrl+C stops the room. If the operating system asks, allow Node.js access on your local network. An optional PORT environment variable changes port 8080.
 
-## Controls
-Select Gameplay, then click the scene for mouse capture. If capture is unavailable, drag to look.
-WASD: walk with smooth acceleration. Shift: sprint. Hold C: crouch. Release C: stand.
-Q: toggle upper inspection height and return to standing. Z no longer lowers the view.
-0: hands (unplug/reconnect infrastructure cables).
-1: console cable. 2: LAN cable.
-E: interact with the aimed device/port, laptop, or server monitor.
-Tab or F: open the laptop. Escape: close laptop/release mouse. X: unplug laptop cable.
-Inspect: return to orbit/zoom controls. M switches modes.
+Everyone must use the host's local address, not the GitHub Pages address. No additional npm packages are required. The server supports the source checkout's dist directory and the ZIP's flat website layout.
 
-Standing eye height is scaled to a human relative to the 42U cabinets. Walking speed is approximately doubled from the previous edition; sprinting is faster still. Rack, cart and KVM station collisions stop the camera walking through equipment. Mouse look, crouch height and field of view change smoothly. Reduced-motion preference disables head bob.
+## What players share
 
-## Laptop inspection
-A mini laptop on a service cart stands beside the primary racks. A carried laptop is visible when a cable slot is equipped in first-person mode.
-Equip 1 and aim at an orange CONSOLE port on a switch, SAN switch or firewall; press E. Equip 2 for a blue SERVICE LAN port. A visible tether connects the laptop to the device. Existing optical/data ports are not interchangeable with the laptop service lead.
-A connection opens the laptop with device status. Use commands or the System / Interfaces / SAN paths buttons:
-help
-show system
-show interfaces
-show links
-show storage
-ping CORE-A
-clear
+Visible engineer avatars have separate colors and name labels. Movement, crouching, cable unplug/reconnect/patch operations, VLANs, port admin state, management addressing, SSH enable state and synthetic workload settings synchronize through the host server. Laptop attachment and terminal sessions are personal. Other players see your device changes.
 
-X or Unplug laptop disconnects the service lead. Walking beyond the service lead length disconnects it automatically. Offline devices stop responding. Opening the laptop pauses movement.
+The host serializes edits. If two players edit at the same revision, the later request receives the new world and asks the player to retry; it does not silently overwrite the other edit. The room is a trusted local engineering sandbox, not competitive authoritative movement or public internet matchmaking. Do not port-forward it to the internet.
 
-## Server monitors and keyboards
-Compute racks have a shared physical KVM monitor and keyboard station. Aim at it and press E, then choose the server on the KVM selector. This opens the server's local simulated inspection session without a laptop network cable.
+Equipment-failure shortcuts from Inspect are disabled while joined because the shared port/VLAN controls are used for co-op troubleshooting. In Inspect, the shared cable workbench remains available. Gameplay keeps only its HUD, console/management screens and LAN room dialog.
 
-## Cable experiments
-Select 0 Hands to keep the original E unplug/reconnect interactions. Cable workbench supports tracing existing cables, patching matching free data ports, path tests, and the redundancy challenge. Reset cabling restores the original data cabling; equipment failures use the separate Restore all control. Laptop service cables have their own disconnect action.
+State lasts while the server runs. Reloading/joining fetches its current world. Stopping/restarting the host resets the room. Leave room to continue with a local copy in single player.
 
-## Scope
-All sessions and telemetry are simulated and reset on reload. Service ports and KVM stations are training aids, not a verified manufacturer port layout. Console, LAN and KVM sessions are read-only. This does not emulate vendor operating systems, real serial settings, IP addressing, VLANs, routing protocols, firewall policy, FC zoning or actual ping. Graph probes reflect the simulated topology. Hardware geometry is a simplified Dell/Fortinet-inspired recreation, not manufacturer CAD.
+## Inspect and Gameplay
 
-Checks used real Three.js geometry with a simulated DOM: existing fault flows, cable patches, occupied-port protection, normal movement speed, crouch/stand, upper inspection toggle, console/LAN sessions, disconnect, offline response and KVM server switching. Browser appearance has not been visually tested.
+Inspect / Gameplay buttons, or M: switch modes. Walking position is remembered.
+WASD: walk. Shift: sprint. Hold C: crouch. Q: toggle upper inspection.
+0: Hands, for infrastructure cables. 1: Console. 2: LAN cable.
+E: interact/connect. X: disconnect laptop. Tab/F: field terminal. Escape: release mouse or close a terminal/room dialog.
+If mouse capture is unavailable over LAN HTTP in your browser, drag the scene to look around; WASD remains available.
 
-Three.js / OrbitControls license: THREE-LICENSE.txt.
+## Field terminal and reachable devices
+
+Equip LAN (2), aim at a blue SERVICE LAN port, and press E. The management switch MGMT-SW is physically cabled to all managed devices. The laptop defaults to 10.10.70.250/24; devices have unique management addresses on VLAN 70.
+
+Choose Target device. Only currently reachable devices can be selected. Switches, firewalls and SAN switches open simulated SSH sessions; compute, storage and GPU devices open OS / Performance dashboards. You can also enter ssh CORE-A or ssh followed by a management IP. Refresh updates the device list.
+
+The OS / Performance view shows synthetic CPU/memory, disk I/O, storage IOPS/latency/throughput, and eight GPU utilization bars where appropriate. Start/Stop workload and Test load controls change the simulation and synchronize in co-op. These are modeled values, not benchmarks or real OS telemetry.
+
+Console (1) uses the orange console port and remains usable when the device's network management path is broken. A serial console or local KVM session accesses its attached device only. Server rack KVM stations let you select a server on that rack.
+
+## Basic switch/firewall commands
+
+This is shared training syntax, not a full Dell OS10 or FortiOS implementation. No commands run on the host computer or real devices.
+
+    help
+    show system
+    show interfaces
+    show vlan
+    show running-config
+    configure terminal
+    interface MGMT UPLINK
+    shutdown
+    no shutdown
+    vlan 350
+    name LAB
+    interface port1
+    switchport mode access
+    switchport access vlan 350
+    switchport mode trunk
+    switchport trunk allowed vlan 1,70,350
+    ip address 10.10.70.20/24
+    management vlan 70
+    ssh enable
+    ssh disable
+    end
+
+Use displayed port names or portN, where N is the index shown in show interfaces. Create a VLAN before assigning it. `conf t`, `shut`, and `no shut` are accepted. Firewall-style aliases: `config system interface`, `edit portN`, `set status up`, `set status down`, `set vlanid N`, `next`, `end`.
+
+Management IP/prefix, VLAN and SSH enable can also be changed in the dashboard's Management network configuration. Changing the management address or disabling its path can disconnect the current session. Reconnect with console or adjust the laptop address in Laptop network.
+
+## Try together
+
+Player 1 connects LAN to a server and opens SSH to CORE-A. Player 2 connects console to CORE-A. Player 1 shuts CORE-A's MGMT UPLINK and loses network access. Player 2 uses `no shutdown` to recover it. Both players see the same port state; Player 1 refreshes and reconnects.
+
+A second exercise is assigning a management uplink to the wrong VLAN, then recovering it from console. Or have one player vary GPU load while another watches its dashboard.
+
+## Simulation boundaries
+
+Management reachability checks cable presence, endpoint admin state, VLAN membership, allowed VLANs and laptop/device subnet compatibility. It is a simplified VLAN graph, not a protocol emulator: no actual SSH encryption/authentication, ICMP, STP, LACP, routing protocols, firewall policies, VLAN tagging on the wire, FC zoning or vendor OS is implemented. Console service leads and the management switch are training additions to simplified hardware models.
+
+The older Inspect application-path probe remains a physical topology exercise. Use the field terminal for management VLAN/subnet tests. Service sessions are personal and do not reserve a remote laptop port across players.
+
+## GitHub Pages / hosted single player
+
+Upload the top-level website files to your repository root, replacing old files. Include network-sim.js, shared-world.js, multiplayer.js, service-kit.js, lab.js, hardware.js, OrbitControls.js and the existing Three.js modules. The lan folder is only needed for local hosting; GitHub Pages cannot run its server. Wait for Pages deployment, then hard-refresh (Command + Shift + R on Mac).
+
+## Verification
+
+Logic checks covered device reachability, SSH selection, port shutdown, console recovery, VLAN isolation/recovery, SSH enable, invalid configuration handling and GPU workload behavior. Real HTTP/SSE integration checks covered four players, fifth-player rejection, room codes, private session tokens, shared state/poses, edit conflicts, leaving/rejoining and static asset serving. Browser rendering and real multi-computer latency have not been visually verified.
+
+Implementation references: Node HTTP https://nodejs.org/api/http.html and browser event streams https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events . Three.js / OrbitControls license is included as THREE-LICENSE.txt.
